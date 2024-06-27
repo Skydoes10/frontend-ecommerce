@@ -1,19 +1,23 @@
 import { z } from 'zod';
 
-const imageFileSchema = z
-	.instanceof(File)
-	.refine((file) => file.size > 0, {
-		message: 'El archivo no debe estar vacío',
-	})
-	.refine(
-		(file) => ['image/jpg', 'image/jpeg', 'image/png'].includes(file.type),
-		{
-			message: 'El archivo debe ser de tipo JPG, JPEG o PNG',
-		}
-	)
-	.refine((file) => file.size <= 5 * 1024 * 1024, {
-		message: 'El archivo no debe ser mayor a 5MB',
-	});
+const imageFileSchema = z.union([
+	z
+		.instanceof(File)
+		.refine((file) => file.size > 0, {
+			message: 'El archivo no debe estar vacío',
+		})
+		.refine(
+			(file) =>
+				['image/jpg', 'image/jpeg', 'image/png'].includes(file.type),
+			{
+				message: 'El archivo debe ser de tipo JPG, JPEG o PNG',
+			}
+		)
+		.refine((file) => file.size <= 5 * 1024 * 1024, {
+			message: 'El archivo no debe ser mayor a 5MB',
+		}),
+	z.string().url({ message: 'Debe ser una URL válida' }),
+]);
 
 export const AddProductSchema = z.object({
 	name: z.string().min(3, {

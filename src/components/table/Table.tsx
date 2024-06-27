@@ -10,14 +10,11 @@ import {
 	TableRow,
 	Paper,
 	TablePagination,
-	IconButton,
-	Tooltip,
 	Box,
 	Skeleton,
 } from '@mui/material';
-import { EditOutlined } from '@mui/icons-material';
 
-import { DeleteButton } from '@/components';
+import { DeleteButton, ProductModal } from '@/components';
 import {
 	useDeleteCategoryMutation,
 	useDeleteGroupMutation,
@@ -135,18 +132,14 @@ export const Table = ({ columns, rows, isLoading, type, refetch }: Props) => {
 															key={column.id}
 															align={column.align}
 														>
-															<Tooltip
-																title="Editar"
-																arrow
-															>
-																<IconButton
-																	sx={{
-																		color: '#1565c0',
-																	}}
-																>
-																	<EditOutlined />
-																</IconButton>
-															</Tooltip>
+															<ProductModal
+																refetch={
+																	refetch
+																}
+																productId={
+																	row.id
+																}
+															/>
 
 															<DeleteButton
 																id={row.id}

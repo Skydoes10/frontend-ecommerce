@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
 	Button,
@@ -24,12 +24,17 @@ import {
 	Alert,
 } from '@mui/material';
 import { AddPhotoAlternateOutlined, DeleteOutline } from '@mui/icons-material';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, set, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 import { AddProductSchema } from '@/schemas';
-import { useCreateProductMutation, useGetAllCategoriesQuery } from '@/store';
+import {
+	useCreateProductMutation,
+	useUpdateProductMutation,
+	useGetAllCategoriesQuery,
+} from '@/store';
+import { Product } from '@/interfaces';
 
 const VisuallyHiddenInput = styled('input')({
 	clip: 'rect(0 0 0 0)',
@@ -45,16 +50,20 @@ const VisuallyHiddenInput = styled('input')({
 
 interface Props {
 	refetch: () => void;
+	product?: Product;
 }
 
-export const AddProductForm = ({ refetch }: Props) => {
+export const ProductForm = ({ refetch, product }: Props) => {
 	const theme = useTheme();
-	const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+
+	const [uploadedImages, setUploadedImages] = useState<(File | string)[]>([]);
 	const [imageError, setImageError] = useState<string | null>(null);
+
 	const { data } = useGetAllCategoriesQuery({ page: 1, limit: 10 });
 	const categories = data?.[0] || [];
 
 	const [createProduct] = useCreateProductMutation();
+	const [updateProduct] = useUpdateProductMutation();
 
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -73,16 +82,39 @@ export const AddProductForm = ({ refetch }: Props) => {
 		formState: { errors, isSubmitting, isDirty },
 	} = useForm<z.infer<typeof AddProductSchema>>({
 		resolver: zodResolver(AddProductSchema),
-		defaultValues: {
-			name: '',
-			price: 0,
-			stock: 0,
-			description: '',
-			category: '',
-			product_images: [],
-			type: '',
-		},
+		defaultValues: product
+			? {
+					name: product.name,
+					price: product.price,
+					stock: product.stock.stock,
+					description: product.description,
+					category: product.category.name,
+					product_images: [],
+					type: product.type,
+			  }
+			: {
+					name: '',
+					price: 0,
+					stock: 0,
+					description: '',
+					category: '',
+					product_images: [],
+					type: '',
+			  },
 	});
+
+	useEffect(() => {
+		if (product) {
+			setValue('name', product.name);
+			setValue('price', product.price);
+			setValue('stock', product.stock.stock);
+			setValue('description', product.description);
+			setValue('category', product.category.name);
+			setValue('type', product.type ?? '');
+			setValue('product_images', product.image_urls);
+			setUploadedImages(product.image_urls);
+		}
+	}, [product, setValue]);
 
 	async function onSubmit(data: z.infer<typeof AddProductSchema>) {
 		const formData = new FormData();
@@ -93,25 +125,54 @@ export const AddProductForm = ({ refetch }: Props) => {
 		formData.append('description', data.description);
 		formData.append('category', data.category);
 		formData.append('type', data.type ?? '');
+
 		uploadedImages.forEach((file) => {
-			formData.append('product_images', file);
+			if (typeof file === 'string') {
+				formData.append('existing_images', file);
+			} else {
+				formData.append('product_images', file);
+			}
 		});
 
 		let errorOccurred = false;
-		await createProduct(formData)
-			.unwrap()
-			.catch((error) => {
-				setSnackbarMessage('Ocurrió un error al crear el producto');
-				setSnackbarSeverity('error');
-				setOpenSnackbar(true);
-				errorOccurred = true;
-			});
 
-		if (!errorOccurred && data) {
-			setSnackbarMessage('Producto creado exitosamente');
-			setSnackbarSeverity('success');
-			setOpenSnackbar(true);
-			refetch();
+		if (product) {
+			await updateProduct({
+				formData,
+				id: product.id,
+			})
+				.unwrap()
+				.catch((error) => {
+					setSnackbarMessage(
+						'Ocurrió un error al editar el producto'
+					);
+					setSnackbarSeverity('error');
+					setOpenSnackbar(true);
+					errorOccurred = true;
+				});
+
+			if (!errorOccurred && data) {
+				setSnackbarMessage('Producto editado exitosamente');
+				setSnackbarSeverity('success');
+				setOpenSnackbar(true);
+				refetch();
+			}
+		} else {
+			await createProduct(formData)
+				.unwrap()
+				.catch((error) => {
+					setSnackbarMessage('Ocurrió un error al crear el producto');
+					setSnackbarSeverity('error');
+					setOpenSnackbar(true);
+					errorOccurred = true;
+				});
+
+			if (!errorOccurred && data) {
+				setSnackbarMessage('Producto creado exitosamente');
+				setSnackbarSeverity('success');
+				setOpenSnackbar(true);
+				refetch();
+			}
 		}
 	}
 
@@ -124,16 +185,26 @@ export const AddProductForm = ({ refetch }: Props) => {
 			}
 			setImageError(null);
 			setUploadedImages((prevImages) => [...prevImages, ...files]);
-			setValue('product_images', [...uploadedImages, ...files], {
-				shouldValidate: true,
-			});
+			setValue(
+				'product_images',
+				[...uploadedImages, ...files].filter(
+					(file) => typeof file !== 'string'
+				) as File[],
+				{
+					shouldValidate: true,
+				}
+			);
 		}
 	};
 
 	const handleDeleteImage = (index: number) => {
 		const updatedImages = uploadedImages.filter((_, i) => i !== index);
 		setUploadedImages(updatedImages);
-		setValue('product_images', updatedImages, { shouldValidate: true });
+		setValue(
+			'product_images',
+			updatedImages.filter((file) => typeof file !== 'string') as File[],
+			{ shouldValidate: true }
+		);
 	};
 
 	return (
@@ -406,14 +477,29 @@ export const AddProductForm = ({ refetch }: Props) => {
 													margin: 1,
 												}}
 											>
-												<Image
-													src={URL.createObjectURL(
-														image
-													)}
-													alt="Product"
-													width={100}
-													height={100}
-												/>
+												{typeof image === 'string' ? (
+													<Image
+														src={image}
+														alt="Product"
+														width={100}
+														height={100}
+														style={{
+															objectFit: 'cover',
+														}}
+													/>
+												) : (
+													<Image
+														src={URL.createObjectURL(
+															image
+														)}
+														alt="Product"
+														width={100}
+														height={100}
+														style={{
+															objectFit: 'cover',
+														}}
+													/>
+												)}
 											</Card>
 										))}
 								</Box>
@@ -421,9 +507,14 @@ export const AddProductForm = ({ refetch }: Props) => {
 								<Card sx={{ borderRadius: '8px' }}>
 									{uploadedImages.length > 0 && (
 										<Image
-											src={URL.createObjectURL(
-												uploadedImages[0]
-											)}
+											src={
+												typeof uploadedImages[0] ===
+												'string'
+													? uploadedImages[0]
+													: URL.createObjectURL(
+															uploadedImages[0]
+													  )
+											}
 											alt="Product"
 											width={200}
 											height={200}
@@ -562,7 +653,7 @@ export const AddProductForm = ({ refetch }: Props) => {
 						disabled={isSubmitting || !isDirty}
 						endIcon={isSubmitting && <CircularProgress size={20} />}
 					>
-						Añadir producto
+						{product ? 'Actualizar producto' : 'Añadir producto'}
 					</Button>
 				</DialogActions>
 			</form>

@@ -142,7 +142,6 @@ export const ManageGroupsPage = () => {
 						/>
 						<AddGroupModal refetch={refetch} />
 						<SortButton onSort={handleSort} />
-						<FilterButton onFilter={handleFilter} />
 					</Grid>
 				</Grid>
 			</Grid>

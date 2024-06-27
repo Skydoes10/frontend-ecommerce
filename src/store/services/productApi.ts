@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-import { CreateProduct, Product, Review } from '@/interfaces';
+import { Product, Review } from '@/interfaces';
 
 type ProductWithNumber = [Product[], number];
 
@@ -24,10 +24,10 @@ export const productApi = createApi({
 		}),
 
 		updateProduct: builder.mutation({
-			query: (product) => ({
-				url: `product/${product.id}`,
-				method: 'PUT',
-				body: product,
+			query: ({ formData, id }) => ({
+				url: `product/${id}`,
+				method: 'PATCH',
+				body: formData,
 			}),
 		}),
 

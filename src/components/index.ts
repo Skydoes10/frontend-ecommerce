@@ -21,7 +21,7 @@ export * from './swiper/ProductSwiper';
 
 export * from './forms/AddCategoryForm';
 export * from './forms/AddGroupForm';
-export * from './forms/AddProductForm';
+export * from './forms/ProductForm';
 export * from './forms/LoginForm';
 export * from './forms/PasswordRecoveryForm';
 export * from './forms/RegisterForm';
@@ -31,7 +31,7 @@ export * from './group/AddGroupModal';
 export * from './options/FilterButton';
 export * from './options/SortButton';
 
-export * from './product/AddProductModal';
+export * from './product/ProductModal';
 export * from './product/ProductDetails';
 
 export * from './products/Filters';

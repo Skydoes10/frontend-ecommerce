@@ -3,8 +3,7 @@ import { useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 
 import {
-	AddProductModal,
-	FilterButton,
+	ProductModal,
 	Search,
 	SortButton,
 	Table,
@@ -209,9 +208,8 @@ export const ManageInventoryPage = () => {
 							border
 							onSearch={(value: string) => setSearchTerm(value)}
 						/>
-						<AddProductModal refetch={refetch} />
+						<ProductModal refetch={refetch} />
 						<SortButton onSort={handleSort} />
-						<FilterButton onFilter={handleFilter} />
 					</Grid>
 				</Grid>
 			</Grid>

@@ -128,7 +128,6 @@ export const ManageCategoriesPage = () => {
 						/>
 						<AddCategoryModal refetch={refetch} />
 						<SortButton onSort={handleSort} />
-						<FilterButton onFilter={handleFilter} />
 					</Grid>
 				</Grid>
 			</Grid>
