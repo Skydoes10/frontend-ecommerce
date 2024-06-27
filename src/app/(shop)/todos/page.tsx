@@ -3,7 +3,7 @@ import { Box, Pagination, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 import { Product } from '@/interfaces';
-import { Filters, LogoLoader, ProductGrid } from '@/components';
+import { Filters, LogoLoader, ProductGrid, Banner} from '@/components';
 import { useGetProductsQuery } from '@/store';
 
 export const AllProducts = () => {
@@ -68,20 +68,27 @@ export const AllProducts = () => {
 
 	return (
 		<Box>
-			<Box sx={{ display: 'flex', justifyContent: 'center', textAlign: 'center', my: 6 }}>
+			{/* <Box sx={{ display: 'flex', justuifyContent: 'center', textAlign: 'center', my: 6 }}>
 				<Typography variant="h3" sx={{ fontWeight: 'bold' }}>
 					{'Todos Nuestros Productos'}
 				</Typography>
-			</Box>
-			<Filters onSelectFilter={handleSelectFilter} />
-			<ProductGrid products={products} />
-			<Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-				<Pagination
-					count={Math.ceil(countProducts / limit)}
-					page={page}
-					onChange={handlePageChange}
-					color="primary"
-				/>
+			</Box> */}
+			<Banner image={"https://fitnest-bucket.s3.amazonaws.com/pexels-leonardho-1552242.jpg"} title={"Todos Nuestros Productos"} />
+			<Box
+				sx={{
+					mx:4
+				}}
+			>
+				<Filters onSelectFilter={handleSelectFilter} />
+				<ProductGrid products={products} />
+				<Box sx={{ display: 'flex', justifyContent: 'center', my: 4, mx: 3 }}>
+					<Pagination
+						count={Math.ceil(countProducts / limit)}
+						page={page}
+						onChange={handlePageChange}
+						color="primary"
+					/>
+				</Box>
 			</Box>
 		</Box>
 	);
