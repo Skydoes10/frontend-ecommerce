@@ -12,16 +12,16 @@ export const SeeMore = () => {
 				pt: 6,
 			}}
 		>
-			<Typography variant="h5" sx={{ fontWeight: '700' }}>
-				MÁS RELEVANTES
+			<Typography variant="h4" sx={{ fontWeight: '700' }}>
+				Más relevantes
 			</Typography>
 			<MuiLink
 				href="/todos"
 				component={Link}
 				underline="hover"
-				sx={{ fontSize: '1rem', fontWeight: 'bold' }}
+				sx={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.8)' }}
 			>
-				VER TODOS
+				Ver todos
 			</MuiLink>
 		</Box>
 	);

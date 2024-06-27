@@ -29,11 +29,11 @@ export const CommentsSection = ({ comments }: Props) => {
 	return (
 		<Box sx={{ my: 10 }}>
 			<Typography
-				variant="h5"
+				variant="h4"
 				component="div"
 				sx={{ mb: 3, fontWeight: 'bold' }}
 			>
-				COMENTARIOS
+				Comentarios
 			</Typography>
 			{displayedComments.length > 0 ? (
 				displayedComments.map((comment, index) => (
@@ -41,7 +41,7 @@ export const CommentsSection = ({ comments }: Props) => {
 				))
 			) : (
 				<Typography variant="body1" component="div">
-					No hay comentarios
+					No hay comentarios :(
 				</Typography>
 			)}
 			<Pagination
